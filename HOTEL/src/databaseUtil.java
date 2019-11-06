@@ -31,7 +31,7 @@ public class databaseUtil {
 			System.out.print("Connecting to MySQL...");
 
 			Class.forName("com.mysql.jdbc.Driver");
-			connect = DriverManager.getConnection("jdbc:mysql://localhost/?user=root&password=root");
+			connect = DriverManager.getConnection("jdbc:mysql://3.233.184.137/?user=admin&password=lbR8s3uMF2Cstq180n7I");
 			stmt = connect.createStatement();
 			stmt.execute("USE `hotelList`;");
 			System.out.println("finish!");
