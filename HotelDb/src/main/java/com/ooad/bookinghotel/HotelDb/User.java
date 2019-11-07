@@ -1,21 +1,43 @@
 package com.ooad.bookinghotel.HotelDb;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity // This tells Hibernate to make a table out of this class
 public class User {
-    private long id;
-    private String firstName, lastName;
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Integer id;
 
-    public User(long id, String firstName, String lastName) {
+    private String name;
+
+    private String email;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-                "Customer[id=%d, firstName='%s', lastName='%s']",
-                id, firstName, lastName);
+    public String getName() {
+        return name;
     }
 
-    // getters & setters omitted for brevity
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
 }
