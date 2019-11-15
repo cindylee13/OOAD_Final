@@ -8,7 +8,8 @@ import javax.persistence.*;
 @Entity // This tells Hibernate to make a table out of this class
 public class SystemConfig extends BaseDbo{
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(updatable = false, nullable = false)
     private Integer id;
 
     @Column(columnDefinition = "varchar(255) default '' ", nullable = false)
@@ -25,9 +26,9 @@ public class SystemConfig extends BaseDbo{
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+//    public void setId(Integer id) {
+//        this.id = id;
+//    }
 
     public String getName() {
         return name;

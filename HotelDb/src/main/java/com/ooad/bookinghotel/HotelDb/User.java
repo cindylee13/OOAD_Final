@@ -2,39 +2,41 @@ package com.ooad.bookinghotel.HotelDb;
 
 import org.springframework.lang.NonNull;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class User extends BaseDbo {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(updatable = false, nullable = false)
     private Integer id;
 
-    @NonNull
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String name;
 
-    @NonNull
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false, updatable = false)
     private String account;
 
-    @NonNull
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String email;
 
-    @NonNull
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String password;
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+//    public void setId(Integer id) {
+//        this.id = id;
+//    }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setAccount(String account) {
@@ -45,9 +47,6 @@ public class User extends BaseDbo {
         return account;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getEmail() {
         return email;

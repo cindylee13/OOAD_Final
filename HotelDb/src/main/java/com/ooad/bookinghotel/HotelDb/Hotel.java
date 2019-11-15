@@ -1,22 +1,24 @@
 package com.ooad.bookinghotel.HotelDb;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class Hotel extends BaseDbo {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @Column(updatable = false, nullable = false)
     private Integer id;
 
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String name;
 
+    @Column(columnDefinition = "varchar(255) default 0", nullable = false)
     private Integer star;
 
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String locality;
 
+    @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String address;
 
     public Integer getId() {
