@@ -3,6 +3,6 @@ module.exports = {
     // options...
     publicPath: process.env.NODE_ENV === 'production'
         ? '/'
-        : '/', //development url
+        : 'http://localhost:8080/', //development url
     outputDir: '../HotelDb/src/main/resources/static/'
 }
