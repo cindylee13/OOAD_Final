@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -32,16 +33,35 @@ public class HotelDbApplication implements CommandLineRunner {
 	@Autowired
 	private HotelRepository hotelRepository;
 
-//	@Autowired
-//	private HotelRoomRepository hotelRoomRepository;
+	@Autowired
+	private HotelRoomRepository hotelRoomRepository;
 
+	@Autowired
+	JdbcTemplate jdbcTemplate;
 
 	@Override
 	public void run(String... strings) throws Exception {
 
 		log.info("Check Hotel List Update Time.");
 
+		jdbcTemplate.execute("DROP VIEW IF EXISTS hotel_info;");
+
+		jdbcTemplate.execute("CREATE VIEW hotel_info  AS " +
+				" select " +
+				" hotel.id, hotel.star, hotel.locality, hotel.address, hotel.json_file_id, hotel.name, " +
+				" sum(CASE WHEN hotel_room.room_type =1 THEN hotel_room.quantity ELSE 0 END) AS SingleRoom, " +
+				" sum(CASE WHEN hotel_room.room_type =1 THEN hotel_room.price ELSE 0 END) AS SingleRoomPrice, " +
+				" sum(CASE WHEN hotel_room.room_type =2 THEN hotel_room.quantity ELSE 0 END) AS DoubleRoom,  " +
+				" sum(CASE WHEN hotel_room.room_type =2 THEN hotel_room.price ELSE 0 END) AS DoubleRoomPrice, " +
+				" sum(CASE WHEN hotel_room.room_type =4 THEN hotel_room.quantity ELSE 0 END) AS QuadRoom, " +
+				" sum(CASE WHEN hotel_room.room_type =4 THEN hotel_room.price ELSE 0 END) AS QuadRoomPrice " +
+				" from hotel  " +
+				" inner join hotel_room on hotel_id = hotel.json_File_id " +
+				" where hotel_room.quantity > 0 " +
+				" group by hotel.id, hotel.star, hotel.locality, hotel.address, hotel.json_file_id, hotel.name ");
+
 		UpdateHotelList();
+
 	}
 
 	private void UpdateHotelList(){
@@ -59,7 +79,7 @@ public class HotelDbApplication implements CommandLineRunner {
 
 			if(hotelListUpdateTimeList.size()>0){
 				hotelUpdateTime = hotelListUpdateTimeList.get(0);
-				SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+				SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 				Date lastDbUpdate = formatter1.parse(hotelUpdateTime.getValue());
 				Date fileUpdateTime = formatter1.parse(fileDate);
 				updateData = fileUpdateTime.compareTo(lastDbUpdate) > 0;
@@ -71,47 +91,55 @@ public class HotelDbApplication implements CommandLineRunner {
 
 				for(Map<String, Object> hotel : list){
 					Integer hotelId =  Integer.parseInt(hotel.get("HotelID").toString());
-					Optional<Hotel> existHotel = hotelRepository.findById(hotelId);
+					log.info("Json hotel id:"+hotelId);
+					List<Hotel> existHotel = hotelRepository.findByJsonFileId(hotelId);
 
 					Hotel upsertHotel = null;
-					if(existHotel.isPresent() == false){
+					if(existHotel.size() <= 0){
 						upsertHotel = new Hotel();
-						upsertHotel.setId(hotelId);
+						upsertHotel.setJsonFileId(hotelId);
+						log.info("new hotel id:"+hotelId);
 
 					}else{
-						upsertHotel = existHotel.get();
+						upsertHotel = existHotel.get(0);
+						log.info("existHotel id:"+hotelId);
 					}
 
 					upsertHotel.setLocality(hotel.get("Locality").toString());
 					upsertHotel.setAddress(hotel.get("Street-Address").toString());
-					upsertHotel.setName(upsertHotel.getLocality()+upsertHotel.getId());
+					upsertHotel.setName(upsertHotel.getLocality()+hotelId);
 					Integer hotelStar = Integer.parseInt(hotel.get("HotelStar").toString());
 					upsertHotel.setStar(hotelStar);
 
-//					ArrayList<Map<String, Object>> rooms = (ArrayList<Map<String, Object>> )hotel.get("Rooms");
+					ArrayList<Map<String, Object>> rooms = (ArrayList<Map<String, Object>> )hotel.get("Rooms");
 
-//					ArrayList<HotelRoom> updateRooms = new ArrayList<HotelRoom>();
-//					for(Map<String, Object> room : rooms){
-//						String roomType = room.get("RoomType").toString();
-//						RoomType rtCode = RoomType.valueOf(roomType);
-//
-//						HotelRoom upsertRoom = null;
-//						Optional<HotelRoom> existHotelRoom = hotelRoomRepository.findByType(hotelId, rtCode.number);
-//						if(existHotelRoom.isPresent() == false){
-//							upsertRoom = new HotelRoom();
-//							upsertRoom.setRoomType(rtCode);
-//							upsertRoom.setHotelId(hotelId);
-//						}else {
-//							upsertRoom = existHotelRoom.get();
-//						}
-//
-//						upsertRoom.setPrice((Integer) room.get("RoomPrice"));
-//						upsertRoom.setQuantity((Integer) room.get("Number"));
-//
-//						updateRooms.add(upsertRoom);
-//					}
-//					hotelRoomRepository.saveAll(updateRooms);
-					hotelRepository.save(upsertHotel);
+					ArrayList<HotelRoom> updateRooms = new ArrayList<HotelRoom>();
+					for(Map<String, Object> room : rooms){
+						String roomType = room.get("RoomType").toString();
+						RoomType rtCode = RoomType.valueOf(roomType);
+
+						HotelRoom upsertRoom = null;
+						List<HotelRoom> existHotelRoom = hotelRoomRepository.findByHotelIdAndRoomType(hotelId, rtCode.number);
+
+						if(existHotelRoom.size() <= 0){
+							upsertRoom = new HotelRoom();
+							upsertRoom.setRoomType(rtCode);
+							upsertRoom.setHotelId(hotelId);
+						}else {
+							upsertRoom = existHotelRoom.get(0);
+						}
+						Integer price = Integer.parseInt( room.get("RoomPrice").toString());
+						upsertRoom.setPrice(price);
+						Integer quantity = Integer.parseInt( room.get("Number").toString());
+						upsertRoom.setQuantity(quantity);
+
+						updateRooms.add(upsertRoom);
+					}
+
+					upsertHotel = hotelRepository.save(upsertHotel);
+					hotelRoomRepository.saveAll(updateRooms);
+
+					log.info("add/update one hotel, id:"+ upsertHotel.getId());
 				}
 			}
 
@@ -128,30 +156,6 @@ public class HotelDbApplication implements CommandLineRunner {
 			e.printStackTrace();
 		}
 
-
-
 	}
 
-//	{
-//		"HotelID": 0,
-//			"HotelStar": 2,
-//			"Locality": "台北",
-//			"Street-Address": "民生東路一段28號",
-//			"Rooms": [
-//		{
-//			"RoomType": "Single",
-//				"RoomPrice": 518,
-//				"Number": 29
-//		},
-//    ]
-//	}
-
 }
-//
-//class HotelObj{
-//	public String HotelID;
-//	public String HotelStar;
-//	public String Locality;
-//	public String Street-Address;
-//
-//}

@@ -21,13 +21,16 @@ public class Hotel extends BaseDbo {
     @Column(columnDefinition = "varchar(255) default ''", nullable = false)
     private String address;
 
+    @Column(updatable = false, nullable = false)
+    private Integer jsonFileId;
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+//    public void setId(Integer id) {
+//        this.id = id;
+//    }
 
     public String getName() {
         return name;
@@ -61,5 +64,11 @@ public class Hotel extends BaseDbo {
         this.address = address;
     }
 
+    public Integer getJsonFileId() {
+        return jsonFileId;
+    }
 
+    public void setJsonFileId(Integer jsonFileId) {
+        this.jsonFileId = jsonFileId;
+    }
 }

@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Entity // This tells Hibernate to make a table out of this class
 public class User extends BaseDbo {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     @Column(updatable = false, nullable = false)
     private Integer id;
 
