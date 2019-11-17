@@ -37,20 +37,26 @@
       </v-btn>
     </v-app-bar>
 
+      <h1>Useless</h1>
+      <h1>Useless</h1>
+      <HotelTable></HotelTable>
+
     <v-content>
-      <HelloWorld/>
+      <!-- <HelloWorld/> -->
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+// import HelloWorld from './components/HelloWorld';
+import HotelTable from './components/HotelTable';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    // HelloWorld,
+    HotelTable
   },
 
   data: () => ({
