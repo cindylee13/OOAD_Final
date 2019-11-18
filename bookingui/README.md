@@ -1,5 +1,13 @@
 # bookingui
 
+## prerequisite
+
+### node.js
+v10.8.0 up
+
+### vue-cli (not required)
+npm install -g @vue/cli
+
 ## Project setup
 ```
 npm install
@@ -14,6 +22,7 @@ npm run serve
 ```
 npm run build
 ```
+build result會放在java server的~/src/main/resources/static/
 
 ### Run your unit tests
 ```
